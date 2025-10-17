@@ -1,8 +1,14 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { validateSignupFormCheck } from '../utils/validate.js';
 import { initForm } from '../utils/init.js';
+import { axiosPost } from '../utils/dataFetch.js';
+import { getSignup, getIdCheck } from '../feature/auth/authAPI.js';
 
-export function Signup() { 
+export function Signup() {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const initArray = ['id', 'pwd', 'cpwd', 'name', 'phone', 'emailName', 'emailDomain'];
     // const initForm = initArray.reduce((acc,cur) => {  //비동기
     //         acc[cur] = "";
@@ -29,23 +35,22 @@ export function Signup() {
         setForm(initForm(initArray));       
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
         const param = {  refs: refs,   setErrors: setErrors }
-        if(validateSignupFormCheck(param)) {
-            console.log("submit-->", form);            
-        }
-    }    
-
-    const url = "http://localhost:8080/member/signup";
-    const formData = { ...form, email: form.emailName.concat('@',form.email)
-        console.log('formData--> ', formData);
-        const result = await axiosPost(url, formData);
+        const formData = { ...form, email: form.emailName.concat('@', form.emailDomain) }
+        const result = await dispatch(getSignup(formData, param));
+//         console.log('result------>> ', result);
         if(result) {
-            alert("회원가입이 완료되었습니다")
-            }
-        else alert("회원가입 실패!!")
-        }
+            alert("회원가입 성공!!");
+            navigate("/login");
+        }    else alert("회원가입 실패!!");
+    }//handleSubmit
+
+    /** 아이디 중복체크 */
+    const handleDupulicateIdCheck = async() => {
+        const result = await dispatch(getIdCheck(form.id));
+        alert(result);
     }
 
     return (
@@ -65,7 +70,8 @@ export function Signup() {
                                     ref={refs.idRef} 
                                     onChange={handleChangeForm}               
                                     placeholder = "아이디 입력(6~20자)" />
-                            <button type="button" 
+                            <button type="button"
+                                    onClick={handleDupulicateIdCheck}
                                   > 중복확인</button>
                             <input type="hidden" id="idCheckResult" value="default" />
                         </div>
