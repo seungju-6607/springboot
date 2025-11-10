@@ -434,7 +434,15 @@ SELECT
 				
 select * from cart;
 
---
+/*********************************************************************
+	장바구니 리스트 VIEW  생성 : view_cartlist
+**********************************************************************/
+drop view view_cartlist;
+select * from information_schema.views where table_name = 'view_cartlist';
+select * from view_cartlist where id='test';
+
+select qty from cart where id='test99';
+
 create view view_cartlist
 as
 select  m.id,
@@ -449,9 +457,9 @@ select  m.id,
 	   c.size,
 	   c.qty,
 	   c.cid,
-       t.totalPrice
+       t.total_price
    from member m, product p, cart c,
-          (select c.id, sum(c.qty * p.price) as totalPrice
+          (select c.id, sum(c.qty * p.price) as total_price
 			from cart c
 			inner join product p on c.pid = p.pid
 			group by c.id) as t
@@ -533,8 +541,174 @@ desc support;
 select sid, title, stype, hits, rdate from support;
 
 
+/*********************************************************************
+	주문 테이블 : orders
+**********************************************************************/
+use shoppy;
+select database();
+select * from member;
+desc member;
+-- drop table orders;
+create table orders (
+  oid         		int 			auto_increment	primary key,
+  order_code		varchar(40)		not null	unique,		-- 카카오 partner_order_id로 사용
+  member_id	      	varchar(50)    	not null,			-- 회원 아이디
+  status        	enum('대기중','결제중','결제완료','취소','환불','만료')
+					not null default	'대기중',
+  shipping_fee     	int				not null 	default 0,	-- 배송비
+  discount_amount  	int				not null 	default 0,	-- 할인금액
+  total_amount     	int				not null,  				-- 결제요청 금액(= 카카오 amount.total)
 
-          
+  -- 수취/배송 
+  receiver_name    	varchar(50),
+  receiver_phone   	varchar(50),
+  zipcode          	varchar(20),
+  address1         	varchar(255),
+  address2         	varchar(255),
+  memo             	varchar(255),
+  odate				datetime,
+  
+  constraint fk_orders_member foreign key(member_id)	references member(id)
+		on delete cascade	on update cascade
+);
+
+show tables;
+desc orders;
+select * from product;
+
+/*********************************************************************
+	주문 상세 테이블 : order_detail
+**********************************************************************/
+create table order_detail (
+	odid			int				auto_increment		primary key,
+	order_code		varchar(40)		not null,	
+    pid				int				not null,
+    pname			varchar(50),
+    size			char(2),
+    qty				int,
+    pid_total_price	decimal,		-- 상품 토탈가격
+    discount		decimal,		-- 할인 금액
+	
+    constraint fk_order_order_detail foreign key(order_code)	references orders(order_code)
+		on delete cascade   on update cascade,
+	constraint fk_product_order_detail foreign key(pid)	references product(pid)
+		on delete cascade  on update cascade
+);
+
+show tables;
+desc order_detail;
+
+select * from view_cartlist where id = "hong";
+desc view_cartList;
+
+select * from orders;
+select * from order_detail;
+desc orders;
+select * from order_detail;
+
+--
+-- INSERT INTO 
+-- 	order_detail(order_code, pid, pname, size, qty, pid_total_price, discount)
+SELECT 
+	'abc', pid, name AS pname, size, qty, totalPrice AS pid_total_price, 
+	0
+FROM view_cartlist
+WHERE cid IN (38,40,42);
+
+select * from view_cartlist;
+
+
+
+-- mysql은 수정, 삭제 시 update mode를 변경
+SET SQL_SAFE_UPDATES = 0;     
+--
+use shoppy;
+select database();
+show tables;      
+select * from orders;
+select * from order_detail;
+select * from view_cartlist;
+
+select ifnull(MAX(pwd), null) as pwd from member where id = 'test';
+
+select * from view_cartlist;
+
+select * from member;
+select * from product;
+desc member;
+desc product;
+
+-- findById('test')
+select id from member where id='test';
+
+select pid, name, price, info, rate, trim(image) as image, imgList from product;
+desc product;
+
+select * from product;
+show tables;
+desc order_detail;
+
+desc order_detail;
+desc product_detailinfo;
+desc product;
+ALTER TABLE product CHANGE imgList img_list JSON;
+
+show tables;
+desc product_return;
+desc product_qna;
+
+select * from cart;
+desc cart;
+
+select * from view_cartlist;
+desc view_cartlist;
+
+-- mysql에서는 view 수정 불가!!, 컬럼 수정 시 재 생성
+select * from information_schema.views
+	where table_name='view_cartlist';
+    
+--
+show tables;
+select * from orders;
+select * from order_detail;
+desc orders;
+select * from view_cartlist where id='hong';
+
+delete from orders;
+delete from order_detail;
+delete from cart;
+
+select * from orders;
+select * from order_detail;
+select * from cart;
+
+select * from orders o, order_detail od, product p
+where o.order_code = od.order_code and od.pid = p.pid;
+
+
+desc order_detail;
+
+desc orders;
+desc order_detail;
+
+select * from orders;
+select * from order_detail;
+select * from cart;
+select * from view_cartlist;
+
+-- mysql은 수정, 삭제 시 update mode를 변경
+SET SQL_SAFE_UPDATES = 0;  
+
+delete from orders;
+delete from cart;
+
+
+
+
+                
+
+
+
 
 
     
