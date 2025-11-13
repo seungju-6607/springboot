@@ -38,7 +38,7 @@ export const getLogin = (formData, param) => async(dispatch) => {
         console.log("result :: ", result);
         if(result.login) {
             await refreshCsrfToken();
-            dispatch(login({"userId":formData.id}));
+            dispatch(login({"userId":formData.id, "role":result.role[0].authority}));
             dispatch(getCartCount(formData.id));
             return true;
         }

@@ -618,6 +618,11 @@ WHERE cid IN (38,40,42);
 select * from view_cartlist;
 
 
+desc support;
+select * from support;
+update support set content = "test" where sid in (1, 5, 18);
+select * from support where rdate like '%2024%';
+select * from support where content like '%test%';
 
 -- mysql은 수정, 삭제 시 update mode를 변경
 SET SQL_SAFE_UPDATES = 0;     
@@ -696,11 +701,22 @@ select * from order_detail;
 select * from cart;
 select * from view_cartlist;
 
+use shoppy;
+select database();
 -- mysql은 수정, 삭제 시 update mode를 변경
-SET SQL_SAFE_UPDATES = 0;  
+set sql_safe_updates = 0;
+select * from member;
 
-delete from orders;
-delete from cart;
+-- role 컬럼 추가
+alter table member add role varchar(10);
+select * from member;
+update member set role = 'USER';
+
+
+
+
+
+
 
 
 
